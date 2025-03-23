@@ -1,9 +1,10 @@
 
-import { useState, useEffect } from 'react';
-import { Bell, Search, Mail, Moon, Sun, Menu } from 'lucide-react';
+import { useState } from 'react';
+import { Menu, User, LogOut } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { cn } from '@/lib/utils';
+import { useIsMobile } from '@/hooks/use-mobile';
+import { useNavigate } from 'react-router-dom';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -11,15 +12,8 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import {
-  Sheet,
-  SheetContent,
-  SheetTrigger,
-} from '@/components/ui/sheet';
-import Sidebar from './Sidebar';
-import { cn } from '@/lib/utils';
-import { useIsMobile } from '@/hooks/use-mobile';
+} from "@/components/ui/dropdown-menu";
+import { useToast } from '@/hooks/use-toast';
 
 type HeaderProps = {
   title: string;
@@ -27,150 +21,83 @@ type HeaderProps = {
 };
 
 const Header = ({ title, description }: HeaderProps) => {
-  const [theme, setTheme] = useState<'light' | 'dark'>('light');
-  const [isScrolled, setIsScrolled] = useState(false);
   const isMobile = useIsMobile();
-
-  useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 10);
-    };
-
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
-
-  const toggleTheme = () => {
-    const newTheme = theme === 'light' ? 'dark' : 'light';
-    setTheme(newTheme);
-    document.documentElement.classList.toggle('dark');
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const navigate = useNavigate();
+  const { toast } = useToast();
+  
+  // Get user data from localStorage
+  const userString = localStorage.getItem('user');
+  const user = userString ? JSON.parse(userString) : null;
+  
+  const handleLogout = () => {
+    // Clear user data
+    localStorage.removeItem('user');
+    
+    toast({
+      title: "Logout bem-sucedido",
+      description: "Você foi desconectado do sistema.",
+    });
+    
+    // Redirect to login
+    navigate('/login');
   };
 
-  const notifications = [
-    {
-      id: 1,
-      title: 'Novo chamado criado',
-      description: 'Cliente João Silva criou um novo chamado',
-      time: '5 min atrás',
-      unread: true,
-    },
-    {
-      id: 2,
-      title: 'Chamado atualizado',
-      description: 'Carlos atualizou o status do chamado #1234',
-      time: '1 hora atrás',
-      unread: true,
-    },
-    {
-      id: 3,
-      title: 'Novo cliente registrado',
-      description: 'Empresa ABC Ltda. foi registrada no sistema',
-      time: 'Ontem',
-      unread: false,
-    },
-  ];
-
   return (
-    <header
-      className={cn(
-        "sticky top-0 z-30 flex h-16 w-full items-center justify-between px-4 transition-all duration-300",
-        isScrolled ? "glass shadow-sm" : "bg-transparent"
-      )}
-    >
-      <div className="flex items-center gap-4">
+    <header className="border-b bg-white dark:bg-gray-950 sticky top-0 z-30">
+      <div className="flex h-16 items-center px-4 md:px-6">
         {isMobile && (
-          <Sheet>
-            <SheetTrigger asChild>
-              <Button variant="ghost" size="icon" className="md:hidden">
-                <Menu className="h-5 w-5" />
-                <span className="sr-only">Toggle menu</span>
-              </Button>
-            </SheetTrigger>
-            <SheetContent side="left" className="p-0">
-              <Sidebar />
-            </SheetContent>
-          </Sheet>
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            className="mr-2" 
+            onClick={() => setSidebarOpen(!sidebarOpen)}
+          >
+            <Menu className="h-5 w-5" />
+            <span className="sr-only">Toggle Menu</span>
+          </Button>
         )}
         
-        <div>
-          <h1 className="text-xl font-semibold animate-fade-in">{title}</h1>
+        <div className="flex-1">
+          <h1 className="text-xl font-semibold">{title}</h1>
           {description && (
-            <p className="text-sm text-muted-foreground animate-fade-in animate-delay-100">{description}</p>
+            <p className={cn(
+              "text-sm text-muted-foreground",
+              "line-clamp-1"
+            )}>
+              {description}
+            </p>
           )}
         </div>
-      </div>
-
-      <div className="flex items-center gap-3">
-        <div className="relative md:w-64 hidden md:block animate-fade-in">
-          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-          <Input
-            type="search"
-            placeholder="Pesquisar..."
-            className="w-full bg-background pl-8 rounded-full border-muted"
-          />
-        </div>
-
-        <Button variant="ghost" size="icon" className="relative animate-fade-in animate-delay-200">
-          <Mail className="h-5 w-5" />
-          <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full" />
-          <span className="sr-only">Messages</span>
-        </Button>
-
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon" className="relative animate-fade-in animate-delay-300">
-              <Bell className="h-5 w-5" />
-              <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full" />
-              <span className="sr-only">Notifications</span>
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-80">
-            <DropdownMenuLabel className="flex items-center justify-between">
-              <span>Notificações</span>
-              <Button variant="ghost" size="sm" className="h-auto p-0 text-xs font-normal text-mvura-500">
-                Marcar todas como lidas
+        
+        <div className="flex items-center gap-2">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="icon" className="rounded-full">
+                <User className="h-5 w-5" />
+                <span className="sr-only">Perfil do usuário</span>
               </Button>
-            </DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            {notifications.map((notification) => (
-              <DropdownMenuItem key={notification.id} className="flex flex-col items-start p-3 cursor-pointer">
-                <div className="flex items-start justify-between w-full">
-                  <div className="font-medium text-sm flex items-center gap-2">
-                    {notification.title}
-                    {notification.unread && (
-                      <span className="w-2 h-2 rounded-full bg-mvura-500" />
-                    )}
-                  </div>
-                  <span className="text-xs text-muted-foreground">{notification.time}</span>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuLabel>Minha Conta</DropdownMenuLabel>
+              {user && (
+                <div className="px-2 py-1.5 text-sm">
+                  <div className="font-medium">{user.name}</div>
+                  <div className="text-xs text-muted-foreground">{user.email}</div>
                 </div>
-                <p className="text-xs text-muted-foreground mt-1">{notification.description}</p>
+              )}
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={() => navigate('/configuracoes')}>
+                Configurações
               </DropdownMenuItem>
-            ))}
-            <DropdownMenuSeparator />
-            <DropdownMenuItem className="h-auto p-2 justify-center text-center cursor-pointer">
-              <span className="text-xs text-mvura-600 font-medium">Ver todas as notificações</span>
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-
-        <Button 
-          variant="ghost" 
-          size="icon" 
-          onClick={toggleTheme}
-          className="animate-fade-in animate-delay-400"
-        >
-          {theme === 'light' ? (
-            <Moon className="h-5 w-5" />
-          ) : (
-            <Sun className="h-5 w-5" />
-          )}
-          <span className="sr-only">Toggle theme</span>
-        </Button>
-
-        <Avatar className="h-8 w-8 transition-all border-2 border-transparent hover:border-mvura-300 animate-fade-in animate-delay-500">
-          <AvatarImage src="/placeholder.svg" alt="Admin" />
-          <AvatarFallback className="bg-mvura-200 text-mvura-700">AD</AvatarFallback>
-        </Avatar>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={handleLogout} className="text-red-500">
+                <LogOut className="mr-2 h-4 w-4" />
+                <span>Sair</span>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
       </div>
     </header>
   );
