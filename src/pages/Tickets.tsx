@@ -48,6 +48,8 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
+import TicketDetailsModal from '@/components/tickets/TicketDetailsModal';
+import { toast } from 'sonner';
 
 const ticketStatusMap: Record<string, string> = {
   'Aberto': 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200',
@@ -192,6 +194,10 @@ const formatDate = (dateString: string) => {
 const Tickets = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [showNewTicketDialog, setShowNewTicketDialog] = useState(false);
+  
+  // Modal states
+  const [selectedTicket, setSelectedTicket] = useState<any>(null);
+  const [showDetailsModal, setShowDetailsModal] = useState(false);
 
   // Filter tickets based on search term
   const filteredTickets = tickets.filter(ticket => 
@@ -201,15 +207,47 @@ const Tickets = () => {
     ticket.category.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  const handleTicketAction = (action: string, ticket: any) => {
+    setSelectedTicket(ticket);
+    
+    switch (action) {
+      case 'details':
+        setShowDetailsModal(true);
+        break;
+      case 'update-status':
+        // This will be handled in the details modal now
+        setShowDetailsModal(true);
+        break;
+      case 'assign':
+        // This will be handled in the details modal now
+        setShowDetailsModal(true);
+        break;
+      case 'add-comment':
+        // This will be handled in the details modal now
+        setShowDetailsModal(true);
+        break;
+      case 'close':
+        handleCloseTicket(ticket);
+        break;
+      default:
+        break;
+    }
+  };
+
+  const handleCloseTicket = (ticket: any) => {
+    // In a real app, this would call an API
+    toast.success(`Ticket ${ticket.id} foi fechado.`);
+  };
+
   return (
-    <Layout title="Chamados" description="Gerencie todos os chamados e tickets de suporte.">
+    <Layout title="Tickets" description="Gerencie todos os tickets de suporte.">
       <div className="space-y-6 animate-fade-in">
         <div className="flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center">
           <div className="relative w-full sm:w-auto">
             <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
             <Input
               type="search"
-              placeholder="Buscar chamados..."
+              placeholder="Buscar tickets..."
               className="pl-8 w-full sm:w-80"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
@@ -426,12 +464,25 @@ const Tickets = () => {
                         <DropdownMenuContent align="end">
                           <DropdownMenuLabel>Ações</DropdownMenuLabel>
                           <DropdownMenuSeparator />
-                          <DropdownMenuItem>Ver detalhes</DropdownMenuItem>
-                          <DropdownMenuItem>Atualizar status</DropdownMenuItem>
-                          <DropdownMenuItem>Atribuir</DropdownMenuItem>
-                          <DropdownMenuItem>Adicionar comentário</DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => handleTicketAction('details', ticket)}>
+                            Ver detalhes
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => handleTicketAction('update-status', ticket)}>
+                            Atualizar status
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => handleTicketAction('assign', ticket)}>
+                            Atribuir
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => handleTicketAction('add-comment', ticket)}>
+                            Adicionar comentário
+                          </DropdownMenuItem>
                           <DropdownMenuSeparator />
-                          <DropdownMenuItem className="text-red-600">Fechar chamado</DropdownMenuItem>
+                          <DropdownMenuItem 
+                            className="text-red-600"
+                            onClick={() => handleTicketAction('close', ticket)}
+                          >
+                            Fechar ticket
+                          </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
                     </TableCell>
@@ -440,7 +491,7 @@ const Tickets = () => {
               ) : (
                 <TableRow>
                   <TableCell colSpan={8} className="h-24 text-center">
-                    Nenhum chamado encontrado.
+                    Nenhum ticket encontrado.
                   </TableCell>
                 </TableRow>
               )}
@@ -450,7 +501,7 @@ const Tickets = () => {
 
         <div className="flex items-center justify-between">
           <p className="text-sm text-muted-foreground">
-            Mostrando <strong>{filteredTickets.length}</strong> de <strong>{tickets.length}</strong> chamados
+            Mostrando <strong>{filteredTickets.length}</strong> de <strong>{tickets.length}</strong> tickets
           </p>
           <div className="flex items-center space-x-2">
             <Button variant="outline" size="sm" disabled>
@@ -465,6 +516,13 @@ const Tickets = () => {
           </div>
         </div>
       </div>
+
+      {/* Ticket Action Modals */}
+      <TicketDetailsModal 
+        open={showDetailsModal} 
+        onClose={() => setShowDetailsModal(false)}
+        ticket={selectedTicket}
+      />
     </Layout>
   );
 };

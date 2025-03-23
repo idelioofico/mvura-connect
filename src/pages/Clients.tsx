@@ -37,6 +37,11 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Plus, Search, MoreHorizontal, Filter, Download, ArrowUpDown } from 'lucide-react';
+import ClientDetailsModal from '@/components/clients/ClientDetailsModal';
+import ClientEditModal from '@/components/clients/ClientEditModal';
+import ClientHistoryModal from '@/components/clients/ClientHistoryModal';
+import CreateTicketModal from '@/components/tickets/CreateTicketModal';
+import { toast } from 'sonner';
 
 // Sample client data
 const clients = [
@@ -122,6 +127,13 @@ const clients = [
 const Clients = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [showAddClientDialog, setShowAddClientDialog] = useState(false);
+  
+  // Modal states
+  const [selectedClient, setSelectedClient] = useState<any>(null);
+  const [showDetailsModal, setShowDetailsModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [showHistoryModal, setShowHistoryModal] = useState(false);
+  const [showCreateTicketModal, setShowCreateTicketModal] = useState(false);
 
   // Filter clients based on search term
   const filteredClients = clients.filter(client => 
@@ -141,6 +153,35 @@ const Clients = () => {
     'Residencial': 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200',
     'Comercial': 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200',
     'Industrial': 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200',
+  };
+
+  const handleClientAction = (action: string, client: any) => {
+    setSelectedClient(client);
+    
+    switch (action) {
+      case 'details':
+        setShowDetailsModal(true);
+        break;
+      case 'edit':
+        setShowEditModal(true);
+        break;
+      case 'history':
+        setShowHistoryModal(true);
+        break;
+      case 'create-ticket':
+        setShowCreateTicketModal(true);
+        break;
+      case 'deactivate':
+        handleDeactivateClient(client);
+        break;
+      default:
+        break;
+    }
+  };
+
+  const handleDeactivateClient = (client: any) => {
+    // In a real app, this would call an API
+    toast.success(`Cliente ${client.name} foi desativado.`);
   };
 
   return (
@@ -312,12 +353,25 @@ const Clients = () => {
                         <DropdownMenuContent align="end">
                           <DropdownMenuLabel>Ações</DropdownMenuLabel>
                           <DropdownMenuSeparator />
-                          <DropdownMenuItem>Ver detalhes</DropdownMenuItem>
-                          <DropdownMenuItem>Editar cliente</DropdownMenuItem>
-                          <DropdownMenuItem>Ver histórico</DropdownMenuItem>
-                          <DropdownMenuItem>Criar chamado</DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => handleClientAction('details', client)}>
+                            Ver detalhes
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => handleClientAction('edit', client)}>
+                            Editar cliente
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => handleClientAction('history', client)}>
+                            Ver histórico
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => handleClientAction('create-ticket', client)}>
+                            Criar ticket
+                          </DropdownMenuItem>
                           <DropdownMenuSeparator />
-                          <DropdownMenuItem className="text-red-600">Desativar</DropdownMenuItem>
+                          <DropdownMenuItem 
+                            className="text-red-600"
+                            onClick={() => handleClientAction('deactivate', client)}
+                          >
+                            Desativar
+                          </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
                     </TableCell>
@@ -346,6 +400,32 @@ const Clients = () => {
           </Button>
         </div>
       </div>
+
+      {/* Client Action Modals */}
+      <ClientDetailsModal 
+        open={showDetailsModal} 
+        onClose={() => setShowDetailsModal(false)}
+        client={selectedClient}
+      />
+      
+      <ClientEditModal 
+        open={showEditModal} 
+        onClose={() => setShowEditModal(false)}
+        client={selectedClient}
+      />
+      
+      <ClientHistoryModal 
+        open={showHistoryModal} 
+        onClose={() => setShowHistoryModal(false)}
+        client={selectedClient}
+      />
+      
+      <CreateTicketModal 
+        open={showCreateTicketModal} 
+        onClose={() => setShowCreateTicketModal(false)}
+        clientId={selectedClient?.id}
+        clientName={selectedClient?.name}
+      />
     </Layout>
   );
 };

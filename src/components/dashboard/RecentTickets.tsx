@@ -105,16 +105,16 @@ const RecentTickets = () => {
   return (
     <Card className="h-full overflow-hidden transition-all hover:shadow-md">
       <CardHeader className="pb-3">
-        <CardTitle>Chamados Recentes</CardTitle>
+        <CardTitle>Tickets Recentes</CardTitle>
         <CardDescription>
-          Visualize e gerencie chamados recentes no sistema.
+          Visualize e gerencie tickets recentes no sistema.
         </CardDescription>
       </CardHeader>
       <Tabs defaultValue="recentes" onValueChange={setActiveTab} className="w-full">
         <div className="px-6">
           <TabsList className="grid grid-cols-3 w-full">
             <TabsTrigger value="recentes">Recentes</TabsTrigger>
-            <TabsTrigger value="meus">Meus Chamados</TabsTrigger>
+            <TabsTrigger value="meus">Meus Tickets</TabsTrigger>
             <TabsTrigger value="criticos">Críticos</TabsTrigger>
           </TabsList>
         </div>
@@ -172,17 +172,17 @@ const RecentTickets = () => {
               ))}
             </div>
             <div className="p-4 text-center">
-              <Button variant="outline" className="w-full">Ver todos os chamados</Button>
+              <Button variant="outline" className="w-full">Ver todos os tickets</Button>
             </div>
           </TabsContent>
           <TabsContent value="meus" className="m-0">
             <div className="p-6 text-center">
-              <p className="text-muted-foreground">Seus chamados atribuídos aparecerão aqui.</p>
+              <p className="text-muted-foreground">Seus tickets atribuídos aparecerão aqui.</p>
             </div>
           </TabsContent>
           <TabsContent value="criticos" className="m-0">
             <div className="p-6 text-center">
-              <p className="text-muted-foreground">Chamados críticos aparecerão aqui.</p>
+              <p className="text-muted-foreground">Tickets críticos aparecerão aqui.</p>
             </div>
           </TabsContent>
         </CardContent>

@@ -23,7 +23,7 @@ const Dashboard = () => {
             className="animate-slide-up animate-delay-100"
           />
           <StatCard
-            title="Chamados Ativos"
+            title="Tickets Ativos"
             value="42"
             change={-2.3}
             trend="down"
