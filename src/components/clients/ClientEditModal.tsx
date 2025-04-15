@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import {
   Dialog,
@@ -19,15 +18,22 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { toast } from 'sonner';
+import { Client } from "@prisma/client"
 
-type ClientEditModalProps = {
-  open: boolean;
-  onClose: () => void;
-  client: any;
-};
+interface ClientEditModalProps {
+  client: Client
+  isOpen: boolean
+  onClose: () => void
+  onSave: (client: Client) => void
+}
 
-const ClientEditModal = ({ open, onClose, client }: ClientEditModalProps) => {
-  const [formData, setFormData] = useState(client || {});
+const ClientEditModal = ({ client, isOpen, onClose, onSave }: ClientEditModalProps) => {
+  const [formData, setFormData] = useState({
+    name: client.name,
+    email: client.email,
+    phone: client.phone,
+    address: client.address
+  });
   const [isLoading, setIsLoading] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -43,18 +49,15 @@ const ClientEditModal = ({ open, onClose, client }: ClientEditModalProps) => {
     e.preventDefault();
     setIsLoading(true);
     
-    // Simulate API call
-    setTimeout(() => {
-      setIsLoading(false);
-      toast.success("Cliente atualizado com sucesso!");
-      onClose();
-    }, 1000);
+    onSave({
+      ...client,
+      ...formData
+    });
+    onClose();
   };
 
-  if (!client) return null;
-
   return (
-    <Dialog open={open} onOpenChange={onClose}>
+    <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
           <DialogTitle>Editar Cliente</DialogTitle>
@@ -62,123 +65,46 @@ const ClientEditModal = ({ open, onClose, client }: ClientEditModalProps) => {
             Atualize as informações do cliente abaixo.
           </DialogDescription>
         </DialogHeader>
-        <form onSubmit={handleSubmit}>
-          <div className="grid gap-4 py-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="name">Nome/Razão Social *</Label>
-                <Input 
-                  id="name" 
-                  value={formData.name || ''} 
-                  onChange={handleChange} 
-                  placeholder="Nome completo ou razão social" 
-                  required
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="nif">NIF/NUIT *</Label>
-                <Input 
-                  id="nif" 
-                  value={formData.nif || ''} 
-                  onChange={handleChange} 
-                  placeholder="Número de identificação fiscal" 
-                  required
-                />
-              </div>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="address">Endereço *</Label>
-              <Input 
-                id="address" 
-                value={formData.address || ''} 
-                onChange={handleChange} 
-                placeholder="Endereço completo" 
-                required
-              />
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="contact">Contacto *</Label>
-                <Input 
-                  id="contact" 
-                  value={formData.contact || ''} 
-                  onChange={handleChange} 
-                  placeholder="Número de telefone" 
-                  required
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="email">E-mail</Label>
-                <Input 
-                  id="email" 
-                  value={formData.email || ''} 
-                  onChange={handleChange} 
-                  placeholder="exemplo@email.com" 
-                  type="email" 
-                />
-              </div>
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="contractType">Tipo de Contrato *</Label>
-                <Select 
-                  value={formData.contractType} 
-                  onValueChange={(value) => handleSelectChange('contractType', value)}
-                >
-                  <SelectTrigger id="contractType">
-                    <SelectValue placeholder="Selecione" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="Residencial">Residencial</SelectItem>
-                    <SelectItem value="Comercial">Comercial</SelectItem>
-                    <SelectItem value="Industrial">Industrial</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="status">Status *</Label>
-                <Select 
-                  value={formData.status} 
-                  onValueChange={(value) => handleSelectChange('status', value)}
-                >
-                  <SelectTrigger id="status">
-                    <SelectValue placeholder="Selecione" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="Ativo">Ativo</SelectItem>
-                    <SelectItem value="Pendente">Pendente</SelectItem>
-                    <SelectItem value="Inativo">Inativo</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="startDate">Data de Início *</Label>
-              <Input 
-                id="startDate" 
-                value={formData.startDate || ''} 
-                onChange={handleChange} 
-                placeholder="DD/MM/AAAA" 
-                required
-              />
-            </div>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="name">Nome</Label>
+            <Input
+              id="name"
+              value={formData.name}
+              onChange={handleChange}
+            />
           </div>
-          <DialogFooter>
-            <Button 
-              variant="outline" 
-              type="button" 
-              onClick={onClose} 
-              disabled={isLoading}
-            >
+          <div className="space-y-2">
+            <Label htmlFor="email">Email</Label>
+            <Input
+              id="email"
+              type="email"
+              value={formData.email}
+              onChange={handleChange}
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="phone">Telefone</Label>
+            <Input
+              id="phone"
+              value={formData.phone}
+              onChange={handleChange}
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="address">Endereço</Label>
+            <Input
+              id="address"
+              value={formData.address}
+              onChange={handleChange}
+            />
+          </div>
+          <div className="flex justify-end space-x-2">
+            <Button type="button" variant="outline" onClick={onClose}>
               Cancelar
             </Button>
-            <Button 
-              type="submit" 
-              disabled={isLoading}
-            >
-              {isLoading ? "Salvando..." : "Salvar Alterações"}
-            </Button>
-          </DialogFooter>
+            <Button type="submit">Salvar</Button>
+          </div>
         </form>
       </DialogContent>
     </Dialog>

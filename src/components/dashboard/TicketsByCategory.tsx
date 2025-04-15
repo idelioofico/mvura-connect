@@ -1,82 +1,33 @@
-
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recharts';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { TicketWithRelations } from "@/types"
 
-type CategoryData = {
-  name: string;
-  value: number;
-  color: string;
-};
+interface TicketsByCategoryProps {
+  tickets: TicketWithRelations[]
+}
 
-const TicketsByCategory = () => {
-  // Sample data for ticket categories
-  const data: CategoryData[] = [
-    { name: 'Falta de Água', value: 35, color: '#0284c7' },
-    { name: 'Problemas no Contador', value: 25, color: '#0ea5e9' },
-    { name: 'Qualidade da Água', value: 20, color: '#38bdf8' },
-    { name: 'Vazamento Visível', value: 15, color: '#7dd3fc' },
-    { name: 'Baixa Pressão', value: 5, color: '#bae6fd' },
-  ];
-
-  const CustomTooltip = ({ active, payload }: any) => {
-    if (active && payload && payload.length) {
-      return (
-        <div className="bg-white p-2 border rounded shadow-sm">
-          <p className="font-medium">{`${payload[0].name}`}</p>
-          <p className="text-sm">{`${payload[0].value} chamados (${payload[0].payload.percentage}%)`}</p>
-        </div>
-      );
-    }
-    return null;
-  };
-
-  // Calculate percentages
-  const total = data.reduce((sum, entry) => sum + entry.value, 0);
-  const dataWithPercentage = data.map(item => ({
-    ...item,
-    percentage: ((item.value / total) * 100).toFixed(1)
-  }));
+export function TicketsByCategory({ tickets }: TicketsByCategoryProps) {
+  const categories = tickets.reduce((acc, ticket) => {
+    const category = ticket.priority
+    acc[category] = (acc[category] || 0) + 1
+    return acc
+  }, {} as Record<string, number>)
 
   return (
-    <Card className="overflow-hidden transition-all hover:shadow-md">
+    <Card>
       <CardHeader>
-        <CardTitle>Chamados por Categoria</CardTitle>
-        <CardDescription>
-          Distribuição de chamados por tipo de problema
-        </CardDescription>
+        <CardTitle>Tickets por Categoria</CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="h-80">
-          <ResponsiveContainer width="100%" height="100%">
-            <PieChart>
-              <Pie
-                data={dataWithPercentage}
-                cx="50%"
-                cy="50%"
-                innerRadius={60}
-                outerRadius={80}
-                paddingAngle={2}
-                dataKey="value"
-                label={({ name, percentage }) => `${name} (${percentage}%)`}
-                labelLine={false}
-              >
-                {dataWithPercentage.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={entry.color} />
-                ))}
-              </Pie>
-              <Tooltip content={<CustomTooltip />} />
-              <Legend 
-                layout="vertical" 
-                verticalAlign="middle" 
-                align="right"
-                wrapperStyle={{ paddingLeft: '20px' }}
-              />
-            </PieChart>
-          </ResponsiveContainer>
+        <div className="space-y-4">
+          {Object.entries(categories).map(([category, count]) => (
+            <div key={category} className="flex items-center justify-between">
+              <span className="font-medium">{category}</span>
+              <span className="text-gray-500">{count} tickets</span>
+            </div>
+          ))}
         </div>
       </CardContent>
     </Card>
-  );
-};
-
-export default TicketsByCategory;
+  )
+}

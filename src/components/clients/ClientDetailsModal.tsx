@@ -1,4 +1,3 @@
-
 import React from 'react';
 import {
   Dialog,
@@ -12,14 +11,15 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { User, Mail, Phone, Home, Calendar, ClipboardList } from 'lucide-react';
+import { ClientWithTickets } from "@/types"
 
-type ClientDetailsModalProps = {
-  open: boolean;
-  onClose: () => void;
-  client: any;
-};
+interface ClientDetailsModalProps {
+  client: ClientWithTickets
+  isOpen: boolean
+  onClose: () => void
+}
 
-const ClientDetailsModal = ({ open, onClose, client }: ClientDetailsModalProps) => {
+const ClientDetailsModal = ({ client, isOpen, onClose }: ClientDetailsModalProps) => {
   if (!client) return null;
 
   const statusColorMap = {
@@ -35,7 +35,7 @@ const ClientDetailsModal = ({ open, onClose, client }: ClientDetailsModalProps) 
   };
 
   return (
-    <Dialog open={open} onOpenChange={onClose}>
+    <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[600px] max-h-[85vh] overflow-hidden flex flex-col">
         <DialogHeader>
           <DialogTitle className="text-xl">Detalhes do Cliente</DialogTitle>
@@ -101,7 +101,7 @@ const ClientDetailsModal = ({ open, onClose, client }: ClientDetailsModalProps) 
                 </Button>
               </div>
               <div className="text-sm text-muted-foreground text-center py-4">
-                Nenhum ticket recente.
+                Total de Tickets: {client.tickets.length}
               </div>
             </div>
           </div>

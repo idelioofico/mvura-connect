@@ -1,7 +1,11 @@
-
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { TicketWithRelations } from "@/types"
+
+interface TicketTimelineProps {
+  tickets: TicketWithRelations[]
+}
 
 const data = [
   { name: 'Jan', abertos: 40, resolvidos: 24 },
@@ -18,7 +22,7 @@ const data = [
   { name: 'Dez', abertos: 35, resolvidos: 30 },
 ];
 
-const TicketTimeline = () => {
+const TicketTimeline = ({ tickets }: TicketTimelineProps) => {
   const CustomTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
       return (
@@ -72,6 +76,24 @@ const TicketTimeline = () => {
               <Bar dataKey="resolvidos" fill="#4ade80" radius={[4, 4, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
+        </div>
+        <div className="space-y-4 mt-4">
+          {tickets.map((ticket) => (
+            <div key={ticket.id} className="border-l-2 border-primary pl-4">
+              <div className="space-y-1">
+                <p className="font-medium">{ticket.title}</p>
+                <p className="text-sm text-gray-500">
+                  Status: {ticket.status} | Prioridade: {ticket.priority}
+                </p>
+                <p className="text-sm text-gray-500">
+                  Cliente: {ticket.client.name}
+                </p>
+                <p className="text-sm text-gray-500">
+                  Data: {new Date(ticket.createdAt).toLocaleDateString()}
+                </p>
+              </div>
+            </div>
+          ))}
         </div>
       </CardContent>
     </Card>

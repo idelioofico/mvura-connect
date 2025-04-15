@@ -1,4 +1,3 @@
-
 import React from 'react';
 import {
   Dialog,
@@ -20,14 +19,15 @@ import {
   TimelineDescription
 } from '@/components/ui/timeline';
 import { UserCog, Edit, ClipboardCheck, UserCheck, FileText } from 'lucide-react';
+import { ClientWithTickets } from "@/types"
 
-type ClientHistoryModalProps = {
-  open: boolean;
-  onClose: () => void;
-  client: any;
-};
+interface ClientHistoryModalProps {
+  client: ClientWithTickets
+  isOpen: boolean
+  onClose: () => void
+}
 
-const ClientHistoryModal = ({ open, onClose, client }: ClientHistoryModalProps) => {
+const ClientHistoryModal = ({ client, isOpen, onClose }: ClientHistoryModalProps) => {
   if (!client) return null;
 
   const history = [
@@ -72,40 +72,34 @@ const ClientHistoryModal = ({ open, onClose, client }: ClientHistoryModalProps) 
   };
 
   return (
-    <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[600px] max-h-[85vh] overflow-hidden flex flex-col">
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="max-w-2xl">
         <DialogHeader>
-          <DialogTitle className="text-xl flex items-center gap-2">
-            <UserCog className="h-5 w-5" />
-            Histórico do Cliente
-          </DialogTitle>
-          <DialogDescription>
-            Histórico completo de atividades relacionadas a {client.name}.
-          </DialogDescription>
+          <DialogTitle>Histórico do Cliente</DialogTitle>
         </DialogHeader>
-        <ScrollArea className="flex-1 pr-4 h-[400px]">
-          <Timeline className="py-4">
-            {history.map((item, index) => (
-              <TimelineItem key={index}>
-                {index < history.length - 1 && <TimelineConnector />}
-                <TimelineHeader>
-                  <TimelineIcon className={getIconColor(item.type)}>
-                    <item.icon className="h-4 w-4" />
-                  </TimelineIcon>
-                  <TimelineTitle>{item.title}</TimelineTitle>
-                </TimelineHeader>
-                <TimelineBody>
-                  <TimelineDescription>{item.description}</TimelineDescription>
-                  <p className="text-xs text-muted-foreground mt-1">{item.date}</p>
-                </TimelineBody>
-              </TimelineItem>
-            ))}
-          </Timeline>
-        </ScrollArea>
-        <div className="flex justify-end gap-2 pt-4">
-          <Button onClick={onClose}>
-            Fechar
-          </Button>
+        <div className="space-y-4">
+          <div>
+            <h3 className="font-semibold">Informações do Cliente</h3>
+            <p>Nome: {client.name}</p>
+            <p>Email: {client.email}</p>
+            <p>Telefone: {client.phone}</p>
+            <p>Endereço: {client.address}</p>
+          </div>
+          <div>
+            <h3 className="font-semibold">Histórico de Tickets</h3>
+            <div className="space-y-2">
+              {client.tickets.map((ticket) => (
+                <div key={ticket.id} className="border p-4 rounded-lg">
+                  <p className="font-medium">{ticket.title}</p>
+                  <p className="text-sm text-gray-500">Status: {ticket.status}</p>
+                  <p className="text-sm text-gray-500">Prioridade: {ticket.priority}</p>
+                  <p className="text-sm text-gray-500">
+                    Data: {new Date(ticket.createdAt).toLocaleDateString()}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
       </DialogContent>
     </Dialog>

@@ -1,4 +1,3 @@
-
 import React from 'react';
 import {
   Dialog,
@@ -25,14 +24,15 @@ import {
 } from '@/components/ui/select';
 import { toast } from 'sonner';
 import { MessageSquare, User, ClipboardList, Clock, AlertCircle } from 'lucide-react';
+import { TicketWithRelations } from "@/types"
 
-type TicketDetailsModalProps = {
-  open: boolean;
-  onClose: () => void;
-  ticket: any;
-};
+interface TicketDetailsModalProps {
+  ticket: TicketWithRelations
+  isOpen: boolean
+  onClose: () => void
+}
 
-const TicketDetailsModal = ({ open, onClose, ticket }: TicketDetailsModalProps) => {
+const TicketDetailsModal = ({ ticket, isOpen, onClose }: TicketDetailsModalProps) => {
   const [activeTab, setActiveTab] = React.useState('details');
   const [comment, setComment] = React.useState('');
   const [status, setStatus] = React.useState(ticket?.status || '');
@@ -103,210 +103,45 @@ const TicketDetailsModal = ({ open, onClose, ticket }: TicketDetailsModalProps) 
   ];
 
   return (
-    <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-hidden flex flex-col">
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="max-w-2xl">
         <DialogHeader>
-          <DialogTitle className="text-xl flex items-center gap-2">
-            <ClipboardList className="h-5 w-5" />
-            Ticket #{ticket.id}
-          </DialogTitle>
-          <DialogDescription>
-            {ticket.title}
-          </DialogDescription>
+          <DialogTitle>Detalhes do Ticket</DialogTitle>
         </DialogHeader>
-
-        <Tabs defaultValue="details" value={activeTab} onValueChange={setActiveTab} className="flex-1 overflow-hidden flex flex-col">
-          <TabsList className="grid grid-cols-3 mb-4">
-            <TabsTrigger value="details">Detalhes</TabsTrigger>
-            <TabsTrigger value="comments">Comentários</TabsTrigger>
-            <TabsTrigger value="actions">Ações</TabsTrigger>
-          </TabsList>
-
-          <ScrollArea className="flex-1 pr-4 h-[400px]">
-            <TabsContent value="details" className="mt-0 space-y-4">
-              <div className="flex flex-col space-y-1.5">
-                <h3 className="text-lg font-semibold">{ticket.title}</h3>
-                <div className="flex items-center gap-2">
-                  <Badge variant="outline" className={ticketPriorityMap[ticket.priority]}>
-                    {ticket.priority}
-                  </Badge>
-                  <Badge variant="outline" className={ticketStatusMap[ticket.status]}>
-                    {ticket.status}
-                  </Badge>
-                </div>
-              </div>
-
-              <Separator />
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-1.5">
-                  <div className="text-sm text-muted-foreground">Cliente</div>
-                  <div className="font-medium flex items-center gap-2">
-                    <User className="h-4 w-4 text-muted-foreground" />
-                    {ticket.client.name}
-                  </div>
-                </div>
-
-                <div className="space-y-1.5">
-                  <div className="text-sm text-muted-foreground">Categoria</div>
-                  <div className="font-medium">{ticket.category}</div>
-                </div>
-
-                <div className="space-y-1.5">
-                  <div className="text-sm text-muted-foreground">Data de Criação</div>
-                  <div className="font-medium flex items-center gap-2">
-                    <Clock className="h-4 w-4 text-muted-foreground" />
-                    {formatDate(ticket.created)}
-                  </div>
-                </div>
-
-                <div className="space-y-1.5">
-                  <div className="text-sm text-muted-foreground">Atendente</div>
-                  <div className="font-medium">
-                    {ticket.assignee ? (
-                      <div className="flex items-center gap-2">
-                        <Avatar className="h-6 w-6">
-                          {ticket.assignee.avatar ? (
-                            <AvatarImage src={ticket.assignee.avatar} alt={ticket.assignee.name} />
-                          ) : null}
-                          <AvatarFallback className="bg-mvura-100 text-mvura-700 text-xs">
-                            {ticket.assignee.initials}
-                          </AvatarFallback>
-                        </Avatar>
-                        {ticket.assignee.name}
-                      </div>
-                    ) : (
-                      <span className="text-muted-foreground">Não atribuído</span>
-                    )}
-                  </div>
-                </div>
-              </div>
-
-              <div className="space-y-2 mt-4">
-                <h4 className="text-sm font-medium">Descrição</h4>
-                <p className="text-sm">
-                  Foi relatado um vazamento de água significativo na rua principal próximo ao Mercado Central. 
-                  A água está escorrendo pela calçada e causando transtornos aos pedestres e comerciantes da região.
-                </p>
-              </div>
-
-              {ticket.status === 'Resolvido' && (
-                <div className="space-y-2 mt-4">
-                  <h4 className="text-sm font-medium">Resolução</h4>
-                  <p className="text-sm">
-                    Equipe técnica identificou e reparou o vazamento na tubulação principal. 
-                    Foi necessária a substituição de uma válvula danificada. 
-                    Serviço concluído em 28/11/2023 às 19:30.
+        <div className="space-y-4">
+          <div>
+            <h3 className="font-semibold">Informações do Ticket</h3>
+            <p>Título: {ticket.title}</p>
+            <p>Descrição: {ticket.description}</p>
+            <p>Status: {ticket.status}</p>
+            <p>Prioridade: {ticket.priority}</p>
+            <p>Data de Criação: {new Date(ticket.createdAt).toLocaleDateString()}</p>
+          </div>
+          <div>
+            <h3 className="font-semibold">Cliente</h3>
+            <p>Nome: {ticket.client.name}</p>
+            <p>Email: {ticket.client.email}</p>
+            <p>Telefone: {ticket.client.phone}</p>
+          </div>
+          <div>
+            <h3 className="font-semibold">Atendente</h3>
+            <p>Nome: {ticket.assignedTo.name}</p>
+            <p>Email: {ticket.assignedTo.email}</p>
+          </div>
+          <div>
+            <h3 className="font-semibold">Comentários</h3>
+            <div className="space-y-2">
+              {ticket.comments.map((comment) => (
+                <div key={comment.id} className="border p-4 rounded-lg">
+                  <p className="font-medium">{comment.content}</p>
+                  <p className="text-sm text-gray-500">
+                    Por: {comment.user.name} em {new Date(comment.createdAt).toLocaleDateString()}
                   </p>
                 </div>
-              )}
-            </TabsContent>
-
-            <TabsContent value="comments" className="mt-0 space-y-4">
-              <div className="space-y-4">
-                {comments.map((comment) => (
-                  <div key={comment.id} className="bg-muted/40 p-3 rounded-md">
-                    <div className="flex items-center gap-2 mb-2">
-                      <Avatar className="h-8 w-8">
-                        {comment.user.avatar ? (
-                          <AvatarImage src={comment.user.avatar} alt={comment.user.name} />
-                        ) : null}
-                        <AvatarFallback className="bg-mvura-100 text-mvura-700">
-                          {comment.user.initials}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div>
-                        <div className="font-medium text-sm">{comment.user.name}</div>
-                        <div className="text-xs text-muted-foreground">{comment.date}</div>
-                      </div>
-                    </div>
-                    <p className="text-sm">{comment.text}</p>
-                  </div>
-                ))}
-
-                <div className="pt-4">
-                  <div className="space-y-3">
-                    <Label htmlFor="comment">Adicionar comentário</Label>
-                    <Textarea 
-                      id="comment" 
-                      placeholder="Escreva um comentário..." 
-                      rows={3}
-                      value={comment}
-                      onChange={(e) => setComment(e.target.value)}
-                    />
-                    <Button onClick={handleAddComment} disabled={!comment.trim()}>
-                      <MessageSquare className="h-4 w-4 mr-2" />
-                      Comentar
-                    </Button>
-                  </div>
-                </div>
-              </div>
-            </TabsContent>
-
-            <TabsContent value="actions" className="mt-0 space-y-6">
-              <div className="space-y-3">
-                <Label htmlFor="status">Atualizar Status</Label>
-                <div className="flex items-center gap-2">
-                  <Select value={status} onValueChange={setStatus}>
-                    <SelectTrigger id="status" className="w-full">
-                      <SelectValue placeholder="Selecione o novo status" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="Aberto">Aberto</SelectItem>
-                      <SelectItem value="Em andamento">Em andamento</SelectItem>
-                      <SelectItem value="Resolvido">Resolvido</SelectItem>
-                      <SelectItem value="Fechado">Fechado</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <Button onClick={handleUpdateStatus} disabled={status === ticket.status}>Atualizar</Button>
-                </div>
-              </div>
-
-              <div className="space-y-3">
-                <Label htmlFor="assignee">Atribuir Para</Label>
-                <div className="flex items-center gap-2">
-                  <Select value={assignee} onValueChange={setAssignee}>
-                    <SelectTrigger id="assignee" className="w-full">
-                      <SelectValue placeholder="Selecione um atendente" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="Maria Oliveira">Maria Oliveira</SelectItem>
-                      <SelectItem value="Carlos Santos">Carlos Santos</SelectItem>
-                      <SelectItem value="Pedro Lima">Pedro Lima</SelectItem>
-                      <SelectItem value="Luísa Fernandes">Luísa Fernandes</SelectItem>
-                      <SelectItem value="Rafael Mendes">Rafael Mendes</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <Button onClick={handleAssign} disabled={assignee === (ticket.assignee?.name || '')}>Atribuir</Button>
-                </div>
-              </div>
-
-              <Separator />
-
-              <div className="space-y-3">
-                <div className="flex items-center gap-2">
-                  <AlertCircle className="h-5 w-5 text-red-500" />
-                  <Label className="text-red-500">Ações Críticas</Label>
-                </div>
-                <div className="flex gap-2">
-                  {ticket.status !== 'Fechado' ? (
-                    <Button variant="destructive" className="w-full">
-                      Fechar Ticket
-                    </Button>
-                  ) : (
-                    <Button variant="outline" className="w-full">
-                      Reabrir Ticket
-                    </Button>
-                  )}
-                </div>
-              </div>
-            </TabsContent>
-          </ScrollArea>
-        </Tabs>
-
-        <DialogFooter className="pt-4">
-          <Button variant="outline" onClick={onClose}>Fechar</Button>
-        </DialogFooter>
+              ))}
+            </div>
+          </div>
+        </div>
       </DialogContent>
     </Dialog>
   );

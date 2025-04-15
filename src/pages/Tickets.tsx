@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { 
   Filter, 
@@ -50,6 +49,7 @@ import {
 import { Textarea } from '@/components/ui/textarea';
 import TicketDetailsModal from '@/components/tickets/TicketDetailsModal';
 import { toast } from 'sonner';
+import { TicketWithRelations } from '@/types';
 
 const ticketStatusMap: Record<string, string> = {
   'Aberto': 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200',
@@ -196,7 +196,7 @@ const Tickets = () => {
   const [showNewTicketDialog, setShowNewTicketDialog] = useState(false);
   
   // Modal states
-  const [selectedTicket, setSelectedTicket] = useState<any>(null);
+  const [selectedTicket, setSelectedTicket] = useState<TicketWithRelations | null>(null);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
 
   // Filter tickets based on search term
@@ -207,7 +207,7 @@ const Tickets = () => {
     ticket.category.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const handleTicketAction = (action: string, ticket: any) => {
+  const handleTicketAction = (action: string, ticket: TicketWithRelations) => {
     setSelectedTicket(ticket);
     
     switch (action) {
@@ -234,9 +234,63 @@ const Tickets = () => {
     }
   };
 
-  const handleCloseTicket = (ticket: any) => {
+  const handleCloseTicket = (ticket: TicketWithRelations) => {
     // In a real app, this would call an API
     toast.success(`Ticket ${ticket.id} foi fechado.`);
+  };
+
+  const [tickets, setTickets] = useState<TicketWithRelations[]>([]);
+  const [newTicket, setNewTicket] = useState({
+    title: '',
+    description: '',
+    clientId: '',
+    priority: 'MEDIUM'
+  });
+
+  const createTicket = async () => {
+    try {
+      const response = await fetch('/api/tickets', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(newTicket),
+      });
+      if (!response.ok) {
+        throw new Error('Failed to create ticket');
+      }
+      const ticket = await response.json();
+      setTickets([...tickets, ticket]);
+      setNewTicket({
+        title: '',
+        description: '',
+        clientId: '',
+        priority: 'MEDIUM'
+      });
+    } catch (error) {
+      console.error('Error creating ticket:', error);
+    }
+  };
+
+  const updateTicketStatus = async (ticketId: string, status: string) => {
+    try {
+      const response = await fetch(`/api/tickets/${ticketId}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ status }),
+      });
+      if (!response.ok) {
+        throw new Error('Failed to update ticket');
+      }
+      const updatedTicket = await response.json();
+      setTickets(tickets.map(ticket => 
+        ticket.id === ticketId ? updatedTicket : ticket
+      ));
+    } catch (error) {
+      console.error('Error updating ticket:', error);
+    }
   };
 
   return (

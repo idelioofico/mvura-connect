@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import Layout from '@/components/layout/Layout';
 import { Button } from '@/components/ui/button';
@@ -42,6 +41,7 @@ import ClientEditModal from '@/components/clients/ClientEditModal';
 import ClientHistoryModal from '@/components/clients/ClientHistoryModal';
 import CreateTicketModal from '@/components/tickets/CreateTicketModal';
 import { toast } from 'sonner';
+import { ClientWithTickets } from '@/types';
 
 // Sample client data
 const clients = [
@@ -129,7 +129,7 @@ const Clients = () => {
   const [showAddClientDialog, setShowAddClientDialog] = useState(false);
   
   // Modal states
-  const [selectedClient, setSelectedClient] = useState<any>(null);
+  const [selectedClient, setSelectedClient] = useState<ClientWithTickets | null>(null);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showHistoryModal, setShowHistoryModal] = useState(false);
@@ -155,7 +155,7 @@ const Clients = () => {
     'Industrial': 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200',
   };
 
-  const handleClientAction = (action: string, client: any) => {
+  const handleClientAction = (action: string, client: ClientWithTickets) => {
     setSelectedClient(client);
     
     switch (action) {
@@ -179,7 +179,7 @@ const Clients = () => {
     }
   };
 
-  const handleDeactivateClient = (client: any) => {
+  const handleDeactivateClient = (client: ClientWithTickets) => {
     // In a real app, this would call an API
     toast.success(`Cliente ${client.name} foi desativado.`);
   };

@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import Layout from '@/components/layout/Layout';
@@ -7,6 +6,9 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
 import { Download, CalendarDays } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { ReportData } from '@/types';
 
 const COLORS = ['#0284c7', '#0ea5e9', '#38bdf8', '#7dd3fc', '#bae6fd'];
 
@@ -91,6 +93,22 @@ const renderCustomizedLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, per
 
 const Reports = () => {
   const [dateRange, setDateRange] = useState('year');
+  const [startDate, setStartDate] = useState('');
+  const [endDate, setEndDate] = useState('');
+  const [reportData, setReportData] = useState<ReportData | null>(null);
+
+  const generateReport = async () => {
+    try {
+      const response = await fetch(`/api/reports?startDate=${startDate}&endDate=${endDate}`);
+      if (!response.ok) {
+        throw new Error('Failed to generate report');
+      }
+      const data = await response.json();
+      setReportData(data);
+    } catch (error) {
+      console.error('Error generating report:', error);
+    }
+  };
 
   return (
     <Layout title="Relatórios" description="Visualize estatísticas e indicadores de desempenho do sistema.">
@@ -232,17 +250,91 @@ const Reports = () => {
           <TabsContent value="tickets" className="space-y-6">
             <Card className="overflow-hidden transition-all hover:shadow-md">
               <CardHeader>
-                <CardTitle>Detalhamento de Chamados</CardTitle>
-                <CardDescription>
-                  Análise detalhada dos chamados por período
-                </CardDescription>
+                <CardTitle>Gerar Relatório</CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-center text-muted-foreground py-12">
-                  Relatórios detalhados sobre chamados serão implementados em breve.
-                </p>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="startDate">Data Inicial</Label>
+                    <Input
+                      id="startDate"
+                      type="date"
+                      value={startDate}
+                      onChange={(e) => setStartDate(e.target.value)}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="endDate">Data Final</Label>
+                    <Input
+                      id="endDate"
+                      type="date"
+                      value={endDate}
+                      onChange={(e) => setEndDate(e.target.value)}
+                    />
+                  </div>
+                </div>
+                <Button onClick={generateReport} className="mt-4">
+                  Gerar Relatório
+                </Button>
               </CardContent>
             </Card>
+
+            {reportData && (
+              <Card className="mt-4">
+                <CardHeader>
+                  <CardTitle>Resultados do Relatório</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <div>
+                      <h3 className="font-semibold">Período</h3>
+                      <p>
+                        {new Date(reportData.startDate).toLocaleDateString()} -{' '}
+                        {new Date(reportData.endDate).toLocaleDateString()}
+                      </p>
+                    </div>
+                    <div>
+                      <h3 className="font-semibold">Total de Tickets</h3>
+                      <p>{reportData.totalTickets}</p>
+                    </div>
+                    <div>
+                      <h3 className="font-semibold">Tickets por Status</h3>
+                      <ul className="list-disc pl-5">
+                        {Object.entries(reportData.ticketsByStatus).map(([status, count]) => (
+                          <li key={status}>
+                            {status}: {count}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                    <div>
+                      <h3 className="font-semibold">Tickets por Prioridade</h3>
+                      <ul className="list-disc pl-5">
+                        {Object.entries(reportData.ticketsByPriority).map(([priority, count]) => (
+                          <li key={priority}>
+                            {priority}: {count}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                    <div>
+                      <h3 className="font-semibold">Tempo Médio de Resolução</h3>
+                      <p>{reportData.averageResolutionTime} horas</p>
+                    </div>
+                    <div>
+                      <h3 className="font-semibold">Tickets por Atendente</h3>
+                      <ul className="list-disc pl-5">
+                        {Object.entries(reportData.ticketsByAttendant).map(([attendant, count]) => (
+                          <li key={attendant}>
+                            {attendant}: {count}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
           </TabsContent>
 
           <TabsContent value="performance" className="space-y-6">
