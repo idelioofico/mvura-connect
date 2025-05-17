@@ -1,3 +1,4 @@
+
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recharts';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { TicketWithRelations } from "@/types"
@@ -31,3 +32,6 @@ export function TicketsByCategory({ tickets }: TicketsByCategoryProps) {
     </Card>
   )
 }
+
+// Add default export
+export default TicketsByCategory;

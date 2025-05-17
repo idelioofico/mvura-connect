@@ -50,7 +50,7 @@ const Dashboard = () => {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <TicketTimeline />
-          <TicketsByCategory />
+          <TicketsByCategory tickets={[]} />
         </div>
 
         <div className="grid grid-cols-1 gap-6">
